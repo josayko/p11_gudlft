@@ -37,6 +37,42 @@ class TestIndex:
         Test that index page is loaded correctly
         """
         response = client.get("/")
-        data = response.data
-        expected_data = b'<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>GUDLFT Registration</title>\n</head>\n<body>\n    <h1>Welcome to the GUDLFT Registration Portal!</h1>\n    Please enter your secretary email to continue:\n    <form action="showSummary" method="post">\n        <label for="email">Email:</label>\n        <input type="email" name="email" id=""/>\n        <button type="submit">Enter</button>\n    </form>\n</body>\n</html>'
-        assert data == expected_data
+        data = response.data.decode()
+        assert ("GUDLFT Registration") in data
+        assert ("Please enter your secretary email to continue:") in data
+
+
+class TestShowSummary:
+    def test_login_with_known_email(self, client):
+        """
+        Case: happy path
+            Test log in with a known email returns status code 200 and
+        expected content
+        """
+        email = server.loadClubs()[0]["email"]
+        response = client.post("/showSummary", data={"email": email})
+        assert response.status_code == 200
+        assert ("GUDLFT Registration") in response.data.decode()
+        assert ("Welcome, " + email) in response.data.decode()
+
+    def test_login_with_unknown_email(self, client):
+        """
+        Case: sad path
+            Test log in with an unknown email returns status code 400 and
+        expected content
+        """
+        email = UNKNOWN_EMAIL
+        response = client.post("/showSummary", data={"email": email})
+        assert response.status_code == 400
+        assert ({"error": "unknown email"}) in response.data.decode()
+
+    def test_login_with_empty_email(self, client):
+        """
+        Case: sad path
+            Test log in with an empty email returns status code 400 and
+        expected content
+        """
+        email = EMPTY_EMAIL
+        response = client.post("/showSummary", data={"email": email})
+        assert response.status_code == 400
+        assert ({"error": "empty email field"}) in response.data.decode()
