@@ -31,6 +31,8 @@ pyOpenSSL==22.0.0
 pyparsing==3.0.8
 PySocks==1.7.1
 pytest==7.1.1
+pytest-flask==1.2.0
+pytest-mock==3.7.0
 pyzmq==22.3.0
 requests==2.27.1
 roundrobin==0.0.2
