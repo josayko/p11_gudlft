@@ -27,14 +27,16 @@ class TestDatabase:
 class TestIndex:
     def test_should_return_status_code_200(self, client):
         """
-        Test that index page is loaded correctly
+        Case: happy path
+            Test that index page is loaded correctly
         """
         response = client.get("/")
         assert response.status_code == 200
 
     def test_should_return_expected_content(self, client):
         """
-        Test that index page is loaded correctly
+        Case: happy path
+            Test that index page is loaded correctly
         """
         response = client.get("/")
         data = response.data.decode()
@@ -76,3 +78,74 @@ class TestShowSummary:
         response = client.post("/showSummary", data={"email": email})
         assert response.status_code == 400
         assert ("<strong>Error</strong>: empty email field") in response.data.decode()
+
+
+class TestBook:
+    def test_should_return_status_code_200_expected_content(self, client):
+        """
+        Case: happy path
+            Test that the page is loaded correctly
+        """
+        competition_name = server.loadCompetitions()[0]["name"]
+        club_name = server.loadClubs()[0]["name"]
+        response = client.get("/book/" + competition_name + "/" + club_name)
+        data = response.data.decode()
+        assert response.status_code == 200
+        assert ("Booking for " + competition_name) in data
+        assert ("Spring Festival") in data
+        assert ("Places available: 25") in data
+        assert ("How many places") in data
+
+    def test_book_from_unknown_club():
+        """
+        Case: sad path
+        """
+        pass
+
+    def test_book_unknown_competition():
+        """
+        Case: sad path
+        """
+        pass
+
+
+class TestPurchasePlaces:
+    def test_should_not_book_more_than_12_places():
+        """
+        Case: sad path
+        """
+        pass
+
+    def test_book_no_places_available():
+        """
+        Case: sad path
+        """
+        pass
+
+    def test_book_negative_number_of_places():
+        """
+        Case: sad path
+        """
+        pass
+
+    def test_book_no_enough_points():
+        """
+        Case: sad path
+        """
+        pass
+
+    def test_book_places_points_are_deducted():
+        """
+        Case: happy path
+        """
+        pass
+
+
+class TestLogout:
+    def test_logout(self, client):
+        """
+        Case: happy path
+            Test that the user is correctly logged out.
+        """
+        response = client.get("/logout")
+        assert response.status_code == 302
