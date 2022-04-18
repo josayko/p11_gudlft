@@ -213,6 +213,18 @@ class TestPurchasePlaces:
         competition_name = mock_data["competitions"][1]["name"]
         club_name = mock_data["clubs"][1]["name"]
         club_points = int(mock_data["clubs"][1]["points"])
+        response = client.post(
+            "/purchasePlaces",
+            data={
+                "places": 4,
+                "competition": competition_name,
+                "club": club_name,
+            },
+        )
+        places_remaining = club_points - 4
+        assert response.status_code == 200
+        assert ("Great-booking complete!") in response.data.decode()
+        assert (f"Points available: {places_remaining}") in response.data.decode()
 
 
 class TestLogout:
