@@ -27,14 +27,16 @@ class TestDatabase:
 class TestIndex:
     def test_should_return_status_code_200(self, client):
         """
-        Test that index page is loaded correctly
+        Case: happy path
+            Test that index page is loaded correctly
         """
         response = client.get("/")
         assert response.status_code == 200
 
     def test_should_return_expected_content(self, client):
         """
-        Test that index page is loaded correctly
+        Case: happy path
+            Test that index page is loaded correctly
         """
         response = client.get("/")
         data = response.data.decode()
@@ -76,3 +78,148 @@ class TestShowSummary:
         response = client.post("/showSummary", data={"email": email})
         assert response.status_code == 400
         assert ("<strong>Error</strong>: empty email field") in response.data.decode()
+
+
+class TestBook:
+    def test_should_return_status_code_200_expected_content(self, client, mock_data):
+        """
+        Case: happy path
+            Test that the page is loaded correctly
+        """
+        competition_name = mock_data["competitions"][1]["name"]
+        club_name = mock_data["clubs"][0]["name"]
+        response = client.get("/book/" + competition_name + "/" + club_name)
+        data = response.data.decode()
+        assert response.status_code == 200
+        assert ("Booking for " + competition_name) in data
+        assert ("Fall Classic") in data
+        assert ("Places available: 13") in data
+        assert ("How many places") in data
+
+    def test_book_from_unknown_club(self, client, mock_data):
+        """
+        Case: sad path
+        """
+        competition_name = mock_data["competitions"][1]["name"]
+        club_name = UNKNOWN_CLUB
+        response = client.get("/book/" + competition_name + "/" + club_name)
+        data = response.data.decode()
+        assert response.status_code == 400
+        assert ("Something went wrong-please try again") in data
+
+    def test_book_unknown_competition(self, client, mock_data):
+        """
+        Case: sad path
+        """
+        competition_name = UNKNOWN_COMPETITION
+        club_name = mock_data["clubs"][0]["name"]
+        response = client.get("/book/" + competition_name + "/" + club_name)
+        data = response.data.decode()
+        assert response.status_code == 400
+        assert ("Something went wrong-please try again") in data
+        pass
+
+
+class TestPurchasePlaces:
+    def test_book_past_competitions(self, client, mock_data):
+        """
+        Case: happy path
+            Test should not purchase places for past competitions
+        """
+        competition_name = mock_data["competitions"][0]["name"]
+        club_name = mock_data["clubs"][3]["name"]
+        response = client.get(
+            "/purchasePlaces/",
+            data={"places": "13", "competition": competition_name, "club": club_name},
+        )
+        data = response.data.decode()
+        assert response.status_code == 400
+        assert ("Error: can not purchase a place for past competitions") in data
+        assert ("Great-booking complete!") not in data
+
+    def test_should_not_purchase_more_than_12_places(self, client, mock_data):
+        """
+        Case: sad path
+        """
+        competition_name = mock_data["competitions"][1]["name"]
+        club_name = mock_data["clubs"][3]["name"]
+
+        response = client.post(
+            "/purchasePlaces",
+            data={"places": "13", "competition": competition_name, "club": club_name},
+        )
+        assert response.status_code == 400
+        assert ("Error: can not purchase more than 12 places") in response.data.decode()
+
+    def test_purchase_no_places_available(self, client, mock_data):
+        """
+        Case: sad path
+        """
+        competition_name = mock_data["competitions"][1]["name"]
+        club_name = mock_data["clubs"][1]["name"]
+        club_name2 = mock_data["clubs"][2]["name"]
+        client.post(
+            "/purchasePlaces",
+            data={"places": "2", "competition": competition_name, "club": club_name},
+        )
+        response = client.post(
+            "/purchasePlaces",
+            data={"places": "12", "competition": competition_name, "club": club_name2},
+        )
+        assert response.status_code == 400
+        assert ("Error: no places available") in response.data.decode()
+
+    def test_purchase_negative_number_of_places(self, client, mock_data):
+        """
+        Case: sad path
+        """
+        competition_name = mock_data["competitions"][1]["name"]
+        club_name = mock_data["clubs"][3]["name"]
+
+        response = client.post(
+            "/purchasePlaces",
+            data={
+                "places": -1,
+                "competition": competition_name,
+                "club": club_name,
+            },
+        )
+        assert response.status_code == 400
+        assert ("Error: places value can not be negative") in response.data.decode()
+
+    def test_purchase_no_enough_points(self, client, mock_data):
+        """
+        Case: sad path
+        """
+        competition_name = mock_data["competitions"][1]["name"]
+        club_name = mock_data["clubs"][1]["name"]
+        club_points = int(mock_data["clubs"][1]["points"])
+
+        response = client.post(
+            "/purchasePlaces",
+            data={
+                "places": club_points + 1,
+                "competition": competition_name,
+                "club": club_name,
+            },
+        )
+        assert response.status_code == 400
+        assert ("Error: no enough points") in response.data.decode()
+
+    def test_purchase_places_points_are_deducted(self, client, mock_data):
+        """
+        Case: happy path
+        """
+        competition_name = mock_data["competitions"][1]["name"]
+        club_name = mock_data["clubs"][1]["name"]
+        club_points = int(mock_data["clubs"][1]["points"])
+
+
+class TestLogout:
+    def test_logout(self, client):
+        """
+        Case: happy path
+            Test that the user is correctly logged out.
+        """
+        response = client.get("/logout")
+        assert response.status_code == 302
