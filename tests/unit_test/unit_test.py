@@ -81,64 +81,138 @@ class TestShowSummary:
 
 
 class TestBook:
-    def test_should_return_status_code_200_expected_content(self, client):
+    def test_should_return_status_code_200_expected_content(self, client, mock_data):
         """
         Case: happy path
             Test that the page is loaded correctly
         """
-        competition_name = server.loadCompetitions()[0]["name"]
-        club_name = server.loadClubs()[0]["name"]
+        competition_name = mock_data["competitions"][1]["name"]
+        club_name = mock_data["clubs"][0]["name"]
         response = client.get("/book/" + competition_name + "/" + club_name)
         data = response.data.decode()
         assert response.status_code == 200
         assert ("Booking for " + competition_name) in data
-        assert ("Spring Festival") in data
-        assert ("Places available: 25") in data
+        assert ("Fall Classic") in data
+        assert ("Places available: 13") in data
         assert ("How many places") in data
 
-    def test_book_from_unknown_club():
+    def test_book_from_unknown_club(self, client, mock_data):
         """
         Case: sad path
         """
-        pass
+        competition_name = mock_data["competitions"][1]["name"]
+        club_name = UNKNOWN_CLUB
+        response = client.get("/book/" + competition_name + "/" + club_name)
+        data = response.data.decode()
+        assert response.status_code == 400
+        assert ("Something went wrong-please try again") in data
 
-    def test_book_unknown_competition():
+    def test_book_unknown_competition(self, client, mock_data):
         """
         Case: sad path
         """
+        competition_name = UNKNOWN_COMPETITION
+        club_name = mock_data["clubs"][0]["name"]
+        response = client.get("/book/" + competition_name + "/" + club_name)
+        data = response.data.decode()
+        assert response.status_code == 400
+        assert ("Something went wrong-please try again") in data
         pass
 
 
 class TestPurchasePlaces:
-    def test_should_not_book_more_than_12_places():
+    def test_book_past_competitions(self, client, mock_data):
+        """
+        Case: happy path
+            Test should not purchase places for past competitions
+        """
+        competition_name = mock_data["competitions"][0]["name"]
+        club_name = mock_data["clubs"][3]["name"]
+        response = client.get(
+            "/purchasePlaces/",
+            data={"places": "13", "competition": competition_name, "club": club_name},
+        )
+        data = response.data.decode()
+        assert response.status_code == 400
+        assert ("Error: can not purchase a place for past competitions") in data
+        assert ("Great-booking complete!") not in data
+
+    def test_should_not_purchase_more_than_12_places(self, client, mock_data):
         """
         Case: sad path
         """
-        pass
+        competition_name = mock_data["competitions"][1]["name"]
+        club_name = mock_data["clubs"][3]["name"]
 
-    def test_book_no_places_available():
+        response = client.post(
+            "/purchasePlaces",
+            data={"places": "13", "competition": competition_name, "club": club_name},
+        )
+        assert response.status_code == 400
+        assert ("Error: can not purchase more than 12 places") in response.data.decode()
+
+    def test_purchase_no_places_available(self, client, mock_data):
         """
         Case: sad path
         """
-        pass
+        competition_name = mock_data["competitions"][1]["name"]
+        club_name = mock_data["clubs"][1]["name"]
+        club_name2 = mock_data["clubs"][2]["name"]
+        client.post(
+            "/purchasePlaces",
+            data={"places": "2", "competition": competition_name, "club": club_name},
+        )
+        response = client.post(
+            "/purchasePlaces",
+            data={"places": "12", "competition": competition_name, "club": club_name2},
+        )
+        assert response.status_code == 400
+        assert ("Error: no places available") in response.data.decode()
 
-    def test_book_negative_number_of_places():
+    def test_purchase_negative_number_of_places(self, client, mock_data):
         """
         Case: sad path
         """
-        pass
+        competition_name = mock_data["competitions"][1]["name"]
+        club_name = mock_data["clubs"][3]["name"]
 
-    def test_book_no_enough_points():
+        response = client.post(
+            "/purchasePlaces",
+            data={
+                "places": -1,
+                "competition": competition_name,
+                "club": club_name,
+            },
+        )
+        assert response.status_code == 400
+        assert ("Error: places value can not be negative") in response.data.decode()
+
+    def test_purchase_no_enough_points(self, client, mock_data):
         """
         Case: sad path
         """
-        pass
+        competition_name = mock_data["competitions"][1]["name"]
+        club_name = mock_data["clubs"][1]["name"]
+        club_points = int(mock_data["clubs"][1]["points"])
 
-    def test_book_places_points_are_deducted():
+        response = client.post(
+            "/purchasePlaces",
+            data={
+                "places": club_points + 1,
+                "competition": competition_name,
+                "club": club_name,
+            },
+        )
+        assert response.status_code == 400
+        assert ("Error: no enough points") in response.data.decode()
+
+    def test_purchase_places_points_are_deducted(self, client, mock_data):
         """
         Case: happy path
         """
-        pass
+        competition_name = mock_data["competitions"][1]["name"]
+        club_name = mock_data["clubs"][1]["name"]
+        club_points = int(mock_data["clubs"][1]["points"])
 
 
 class TestLogout:
