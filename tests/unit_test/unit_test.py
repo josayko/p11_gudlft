@@ -66,7 +66,7 @@ class TestShowSummary:
         email = UNKNOWN_EMAIL
         response = client.post("/showSummary", data={"email": email})
         assert response.status_code == 400
-        assert ("<strong>Error</strong>: unknown email") in response.data.decode()
+        assert ("Error: unknown email") in response.data.decode()
 
     def test_login_with_empty_email(self, client):
         """
@@ -77,10 +77,23 @@ class TestShowSummary:
         email = EMPTY_EMAIL
         response = client.post("/showSummary", data={"email": email})
         assert response.status_code == 400
-        assert ("<strong>Error</strong>: empty email field") in response.data.decode()
+        assert ("Error: empty email field") in response.data.decode()
 
 
 class TestBook:
+    def test_book_past_competitions(self, client, mock_data):
+        """
+        Case: happy path
+            Test should not be able to book for past competitions
+        """
+        competition_name = mock_data["competitions"][0]["name"]
+        club_name = mock_data["clubs"][3]["name"]
+        response = client.get("/book/" + competition_name + "/" + club_name)
+        data = response.data.decode()
+        assert response.status_code == 400
+        assert ("Error: can not purchase a place for past competitions") in data
+        assert ("Great-booking complete!") not in data
+
     def test_should_return_status_code_200_expected_content(self, client, mock_data):
         """
         Case: happy path
@@ -117,26 +130,9 @@ class TestBook:
         data = response.data.decode()
         assert response.status_code == 400
         assert ("Something went wrong-please try again") in data
-        pass
 
 
 class TestPurchasePlaces:
-    def test_book_past_competitions(self, client, mock_data):
-        """
-        Case: happy path
-            Test should not purchase places for past competitions
-        """
-        competition_name = mock_data["competitions"][0]["name"]
-        club_name = mock_data["clubs"][3]["name"]
-        response = client.get(
-            "/purchasePlaces/",
-            data={"places": "13", "competition": competition_name, "club": club_name},
-        )
-        data = response.data.decode()
-        assert response.status_code == 400
-        assert ("Error: can not purchase a place for past competitions") in data
-        assert ("Great-booking complete!") not in data
-
     def test_should_not_purchase_more_than_12_places(self, client, mock_data):
         """
         Case: sad path

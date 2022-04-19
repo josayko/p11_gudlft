@@ -55,7 +55,7 @@ def mock_data(mocker):
                 "numberOfPlaces": "25"
             },
             {
-                "name": "Fall Classic 2022",
+                "name": "Fall Classic",
                 "date": "2022-10-22 13:30:00",
                 "numberOfPlaces": "13"
             }
