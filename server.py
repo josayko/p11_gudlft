@@ -3,10 +3,10 @@ from flask import Flask, render_template, request, redirect, flash, url_for
 from datetime import datetime, date
 
 CLUBS_DATA = "clubs.json"
-# COMPETITIONS_DATA = "competitions.json"
+COMPETITIONS_DATA = "competitions.json"
 
 # CLUBS_DATA = "tests/mock_clubs.json"
-COMPETITIONS_DATA = "tests/mock_competitions.json"
+# COMPETITIONS_DATA = "tests/mock_competitions.json"
 
 
 def loadClubs():
