@@ -2,11 +2,11 @@ import json
 from flask import Flask, render_template, request, redirect, flash, url_for
 from datetime import datetime, date
 
-# CLUBS_DATA = "clubs.json"
-# COMPETITIONS_DATA = "competitions.json"
+CLUBS_DATA = "clubs.json"
+COMPETITIONS_DATA = "competitions.json"
 
-CLUBS_DATA = "tests/mock_clubs.json"
-COMPETITIONS_DATA = "tests/mock_competitions.json"
+# CLUBS_DATA = "tests/mock_clubs.json"
+# COMPETITIONS_DATA = "tests/mock_competitions.json"
 
 
 def loadClubs():
@@ -46,8 +46,16 @@ def showSummary():
 
 @app.route("/book/<competition>/<club>")
 def book(competition, club):
-    foundClub = [c for c in clubs if c["name"] == club][0]
-    foundCompetition = [c for c in competitions if c["name"] == competition][0]
+    try:
+        foundClub = [c for c in clubs if c["name"] == club][0]
+        foundCompetition = [c for c in competitions if c["name"] == competition][0]
+    except IndexError:
+        flash("Something went wrong-please try again")
+        return (
+            render_template("welcome.html", club=club, competitions=competitions),
+            400,
+        )
+
     if foundClub and foundCompetition:
         competition_date = datetime.strptime(
             foundCompetition["date"], "%Y-%m-%d %H:%M:%S"
