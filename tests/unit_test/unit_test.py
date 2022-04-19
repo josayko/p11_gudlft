@@ -66,7 +66,7 @@ class TestShowSummary:
         email = UNKNOWN_EMAIL
         response = client.post("/showSummary", data={"email": email})
         assert response.status_code == 400
-        assert ("<strong>Error</strong>: unknown email") in response.data.decode()
+        assert ("Error: unknown email") in response.data.decode()
 
     def test_login_with_empty_email(self, client):
         """
@@ -77,7 +77,7 @@ class TestShowSummary:
         email = EMPTY_EMAIL
         response = client.post("/showSummary", data={"email": email})
         assert response.status_code == 400
-        assert ("<strong>Error</strong>: empty email field") in response.data.decode()
+        assert ("Error: empty email field") in response.data.decode()
 
 
 class TestBook:

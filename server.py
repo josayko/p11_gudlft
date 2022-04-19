@@ -3,10 +3,10 @@ from flask import Flask, render_template, request, redirect, flash, url_for
 from datetime import datetime, date
 
 CLUBS_DATA = "clubs.json"
-COMPETITIONS_DATA = "competitions.json"
+# COMPETITIONS_DATA = "competitions.json"
 
 # CLUBS_DATA = "tests/mock_clubs.json"
-# COMPETITIONS_DATA = "tests/mock_competitions.json"
+COMPETITIONS_DATA = "tests/mock_competitions.json"
 
 
 def loadClubs():
@@ -30,18 +30,25 @@ clubs = loadClubs()
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", clubs=clubs)
 
 
 @app.route("/showSummary", methods=["POST"])
 def showSummary():
     if request.form["email"] == "":
-        return render_template("index.html", error="empty email field"), 400
+        flash("Error: empty email field")
+        return (
+            render_template("index.html", clubs=clubs),
+            400,
+        )
     try:
         club = [club for club in clubs if club["email"] == request.form["email"]][0]
     except IndexError:
-        return render_template("index.html", error="unknown email"), 400
-    return render_template("welcome.html", club=club, competitions=competitions)
+        flash("Error: unknown email")
+        return render_template("index.html", clubs=clubs), 400
+    return render_template(
+        "welcome.html", club=club, competitions=competitions, clubs=clubs
+    )
 
 
 @app.route("/book/<competition>/<club>")
@@ -52,7 +59,9 @@ def book(competition, club):
     except IndexError:
         flash("Something went wrong-please try again")
         return (
-            render_template("welcome.html", club=club, competitions=competitions),
+            render_template(
+                "welcome.html", club=club, competitions=competitions, clubs=clubs
+            ),
             400,
         )
 
@@ -64,7 +73,10 @@ def book(competition, club):
             flash("Error: can not purchase a place for past competitions")
             return (
                 render_template(
-                    "welcome.html", club=foundClub, competitions=competitions
+                    "welcome.html",
+                    club=foundClub,
+                    competitions=competitions,
+                    clubs=clubs,
                 ),
                 400,
             )
@@ -75,7 +87,9 @@ def book(competition, club):
     else:
         flash("Something went wrong-please try again")
         return (
-            render_template("welcome.html", club=foundClub, competitions=competitions),
+            render_template(
+                "welcome.html", club=foundClub, competitions=competitions, clubs=clubs
+            ),
             400,
         )
 
@@ -90,14 +104,18 @@ def purchasePlaces():
     if placesRequired > 12:
         flash("Error: can not purchase more than 12 places")
         return (
-            render_template("welcome.html", club=club, competitions=competitions),
+            render_template(
+                "welcome.html", club=club, competitions=competitions, clubs=clubs
+            ),
             400,
         )
     competition_places = int(competition["numberOfPlaces"])
     if placesRequired > competition_places:
         flash("Error: no places available")
         return (
-            render_template("welcome.html", club=club, competitions=competitions),
+            render_template(
+                "welcome.html", club=club, competitions=competitions, clubs=clubs
+            ),
             400,
         )
 
@@ -105,7 +123,9 @@ def purchasePlaces():
     if placesRequired <= 0:
         flash("Error: places value can not be negative")
         return (
-            render_template("welcome.html", club=club, competitions=competitions),
+            render_template(
+                "welcome.html", club=club, competitions=competitions, clubs=clubs
+            ),
             400,
         )
 
@@ -116,7 +136,9 @@ def purchasePlaces():
         ):
             flash("Error: can not purchase more than 12 places")
             return (
-                render_template("welcome.html", club=club, competitions=competitions),
+                render_template(
+                    "welcome.html", club=club, competitions=competitions, clubs=clubs
+                ),
                 400,
             )
         competition["numberOfPlaces"] = (
@@ -127,11 +149,15 @@ def purchasePlaces():
     else:
         flash("Error: no enough points")
         return (
-            render_template("welcome.html", club=club, competitions=competitions),
+            render_template(
+                "welcome.html", club=club, competitions=competitions, clubs=clubs
+            ),
             400,
         )
     flash("Great-booking complete!")
-    return render_template("welcome.html", club=club, competitions=competitions)
+    return render_template(
+        "welcome.html", club=club, competitions=competitions, clubs=clubs
+    )
 
 
 # TODO: Add route for points display
