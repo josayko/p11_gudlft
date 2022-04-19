@@ -2,11 +2,11 @@ import json
 from flask import Flask, render_template, request, redirect, flash, url_for
 from datetime import datetime, date
 
-CLUBS_DATA = "clubs.json"
-COMPETITIONS_DATA = "competitions.json"
+# CLUBS_DATA = "clubs.json"
+# COMPETITIONS_DATA = "competitions.json"
 
-# CLUBS_DATA = "tests/mock_clubs.json"
-# COMPETITIONS_DATA = "tests/mock_competitions.json"
+CLUBS_DATA = "tests/mock_clubs.json"
+COMPETITIONS_DATA = "tests/mock_competitions.json"
 
 
 def loadClubs():
@@ -55,7 +55,9 @@ def book(competition, club):
         if competition_date < datetime.now():
             flash("Error: can not purchase a place for past competitions")
             return (
-                render_template("welcome.html", club=club, competitions=competitions),
+                render_template(
+                    "welcome.html", club=foundClub, competitions=competitions
+                ),
                 400,
             )
 
@@ -65,7 +67,7 @@ def book(competition, club):
     else:
         flash("Something went wrong-please try again")
         return (
-            render_template("welcome.html", club=club, competitions=competitions),
+            render_template("welcome.html", club=foundClub, competitions=competitions),
             400,
         )
 
