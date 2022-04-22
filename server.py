@@ -78,7 +78,7 @@ def book(competition, club):
                     competitions=competitions,
                     clubs=clubs,
                 ),
-                400,
+                200,
             )
 
         return render_template(
@@ -107,7 +107,7 @@ def purchasePlaces():
             render_template(
                 "welcome.html", club=club, competitions=competitions, clubs=clubs
             ),
-            400,
+            200,
         )
     competition_places = int(competition["numberOfPlaces"])
     if placesRequired > competition_places:
@@ -116,7 +116,7 @@ def purchasePlaces():
             render_template(
                 "welcome.html", club=club, competitions=competitions, clubs=clubs
             ),
-            400,
+            200,
         )
 
     club_points = int(club["points"])

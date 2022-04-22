@@ -2,10 +2,10 @@ import server
 
 CLUBS_NB = 3
 COMPETITIONS_NB = 2
-UNKNOWN_EMAIL = "test@test.org"
+UNKNOWN_EMAIL = "unknown@unknown.org"
 EMPTY_EMAIL = ""
-UNKNOWN_COMPETITION = "test"
-UNKNOWN_CLUB = "test"
+UNKNOWN_COMPETITION = "unknown"
+UNKNOWN_CLUB = "unknown"
 
 
 class TestDatabase:
@@ -90,7 +90,7 @@ class TestBook:
         club_name = mock_data["clubs"][3]["name"]
         response = client.get("/book/" + competition_name + "/" + club_name)
         data = response.data.decode()
-        assert response.status_code == 400
+        assert response.status_code == 200
         assert ("Error: can not purchase a place for past competitions") in data
         assert ("Great-booking complete!") not in data
 
@@ -144,7 +144,7 @@ class TestPurchasePlaces:
             "/purchasePlaces",
             data={"places": "13", "competition": competition_name, "club": club_name},
         )
-        assert response.status_code == 400
+        assert response.status_code == 200
         assert ("Error: can not purchase more than 12 places") in response.data.decode()
 
     def test_purchase_no_places_available(self, client, mock_data):
@@ -162,7 +162,7 @@ class TestPurchasePlaces:
             "/purchasePlaces",
             data={"places": "12", "competition": competition_name, "club": club_name2},
         )
-        assert response.status_code == 400
+        assert response.status_code == 200
         assert ("Error: no places available") in response.data.decode()
 
     def test_purchase_negative_number_of_places(self, client, mock_data):
