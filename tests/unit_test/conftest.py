@@ -1,5 +1,10 @@
 import pytest
+from gevent import monkey
+
 import server
+
+# Fix locust monkey patch warning
+monkey.patch_all(thread=True)
 
 MOCK_COMPETITIONS_PATH = "tests/mock_competitions.json"
 MOCK_CLUBS_PATH = "tests/mock_clubs.json"

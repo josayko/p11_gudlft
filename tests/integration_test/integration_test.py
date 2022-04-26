@@ -1,4 +1,4 @@
-from server import loadClubs, loadCompetitions, POINTS_PER_PLACE
+from server import POINTS_PER_PLACE, loadClubs, loadCompetitions
 
 
 class TestIntegration:
