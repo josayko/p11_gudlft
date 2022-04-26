@@ -160,7 +160,7 @@ def purchasePlaces():
                 render_template(
                     "welcome.html", club=club, competitions=competitions, clubs=clubs
                 ),
-                400,
+                200,
             )
         flash("Great-booking complete!")
     except ValueError:

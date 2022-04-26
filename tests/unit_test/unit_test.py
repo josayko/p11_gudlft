@@ -199,7 +199,7 @@ class TestPurchasePlaces:
                 "club": club_name,
             },
         )
-        assert response.status_code == 400
+        assert response.status_code == 200
         assert ("Error: no enough points") in response.data.decode()
 
     def test_purchase_places_points_are_deducted(self, client, mock_data):
