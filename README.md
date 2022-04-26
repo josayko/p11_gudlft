@@ -92,3 +92,11 @@ $ coverage html
 ```
 
 ### Performance test
+
+- While the application is running on http://localhost:5000,
+
+```bash
+$ locust -f tests/performance_test/performance_test.py
+```
+
+- Locust dashboard wil be available on http://localhost:8089/

@@ -8,7 +8,7 @@ A development environment has been set up in `config.py` and `.env.development`.
 $ python server
 ```
 
-### Unit testing
+### Unit and integration testing
 
 - Run all tests
 
@@ -44,3 +44,11 @@ $ coverage html
 ```
 
 ### Performance test
+
+- While the application is running on http://localhost:5000,
+
+```bash
+$ locust -f tests/performance_test/performance_test.py
+```
+
+- Locust dashboard wil be available on http://localhost:8089/

@@ -1,14 +1,13 @@
 from locust import HttpUser, task
 from server import loadClubs, loadCompetitions
 
-"""
-locust -f tests/performance_test/performance_test.py
-url: http://localhost:8089/
-host: http://127.0.0.1:5000
-"""
-
 
 class PerformanceTest(HttpUser):
+    """
+    locust -f tests/performance_test/performance_test.py
+    url: http://localhost:8089/
+    host: http://127.0.0.1:5000
+    """
 
     club = loadClubs()[0]
     competition = loadCompetitions()[1]
