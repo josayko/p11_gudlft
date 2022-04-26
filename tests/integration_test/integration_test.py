@@ -1,4 +1,4 @@
-import server
+from server import loadClubs, loadCompetitions, POINTS_PER_PLACE
 
 
 class TestIntegration:
@@ -11,10 +11,10 @@ class TestIntegration:
         assert response.status_code == 200
 
         # loadClubs
-        club = server.loadClubs()[0]
+        club = loadClubs()[0]
 
         # loadCompetitions
-        competition = server.loadCompetitions()[1]
+        competition = loadCompetitions()[1]
 
         # showSummary
         email = club["email"]
@@ -44,7 +44,7 @@ class TestIntegration:
                 "club": club_name,
             },
         )
-        places_remaining = club_points - 1
+        places_remaining = club_points - 1 * POINTS_PER_PLACE
         assert response.status_code == 200
         assert ("Great-booking complete!") in response.data.decode()
         assert (f"Points available: {places_remaining}") in response.data.decode()

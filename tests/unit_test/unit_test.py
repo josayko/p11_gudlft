@@ -1,4 +1,4 @@
-import server
+from server import loadClubs, loadCompetitions, POINTS_PER_PLACE
 
 CLUBS_NB = 3
 COMPETITIONS_NB = 2
@@ -13,14 +13,14 @@ class TestDatabase:
         """
         Test that clubs data are loaded correctly
         """
-        clubs_list = server.loadClubs()
+        clubs_list = loadClubs()
         assert len(clubs_list) == CLUBS_NB
 
     def test_loadCompetitions(self):
         """
         Test that competitions data are loaded correctly
         """
-        competitions_list = server.loadCompetitions()
+        competitions_list = loadCompetitions()
         assert len(competitions_list) == COMPETITIONS_NB
 
 
@@ -152,8 +152,8 @@ class TestPurchasePlaces:
         Case: sad path
         """
         competition_name = mock_data["competitions"][1]["name"]
-        club_name = mock_data["clubs"][1]["name"]
-        club_name2 = mock_data["clubs"][2]["name"]
+        club_name = mock_data["clubs"][0]["name"]
+        club_name2 = mock_data["clubs"][3]["name"]
         client.post(
             "/purchasePlaces",
             data={"places": "2", "competition": competition_name, "club": club_name},
@@ -217,10 +217,10 @@ class TestPurchasePlaces:
                 "club": club_name,
             },
         )
-        places_remaining = club_points - 1
+        points_remaining = club_points - 1 * POINTS_PER_PLACE
         assert response.status_code == 200
         assert ("Great-booking complete!") in response.data.decode()
-        assert (f"Points available: {places_remaining}") in response.data.decode()
+        assert (f"Points available: {points_remaining}") in response.data.decode()
 
 
 class TestLogout:

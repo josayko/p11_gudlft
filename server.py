@@ -4,6 +4,7 @@ from datetime import datetime, date
 
 CLUBS_DATA = "clubs.json"
 COMPETITIONS_DATA = "competitions.json"
+POINTS_PER_PLACE = 3
 
 # CLUBS_DATA = "tests/mock_clubs.json"
 # COMPETITIONS_DATA = "tests/mock_competitions.json"
@@ -96,65 +97,74 @@ def book(competition, club):
 
 @app.route("/purchasePlaces", methods=["POST"])
 def purchasePlaces():
-    competition = [c for c in competitions if c["name"] == request.form["competition"]][
-        0
-    ]
-    club = [c for c in clubs if c["name"] == request.form["club"]][0]
-    placesRequired = int(request.form["places"])
-    if placesRequired > 12:
-        flash("Error: can not purchase more than 12 places")
-        return (
-            render_template(
-                "welcome.html", club=club, competitions=competitions, clubs=clubs
-            ),
-            200,
-        )
-    competition_places = int(competition["numberOfPlaces"])
-    if placesRequired > competition_places:
-        flash("Error: no places available")
-        return (
-            render_template(
-                "welcome.html", club=club, competitions=competitions, clubs=clubs
-            ),
-            200,
-        )
-
-    club_points = int(club["points"])
-    if placesRequired <= 0:
-        flash("Error: places value can not be negative")
-        return (
-            render_template(
-                "welcome.html", club=club, competitions=competitions, clubs=clubs
-            ),
-            400,
-        )
-
-    elif club_points >= placesRequired:
-        if (
-            competition["name"] in club
-            and (club[competition["name"]] + placesRequired) > 12
-        ):
+    try:
+        competition = [
+            c for c in competitions if c["name"] == request.form["competition"]
+        ][0]
+        club = [c for c in clubs if c["name"] == request.form["club"]][0]
+        placesRequired = int(request.form["places"])
+        if placesRequired > 12:
             flash("Error: can not purchase more than 12 places")
+            return (
+                render_template(
+                    "welcome.html", club=club, competitions=competitions, clubs=clubs
+                ),
+                200,
+            )
+        competition_places = int(competition["numberOfPlaces"])
+        if placesRequired > competition_places:
+            flash("Error: no places available")
+            return (
+                render_template(
+                    "welcome.html", club=club, competitions=competitions, clubs=clubs
+                ),
+                200,
+            )
+
+        club_points = int(club["points"])
+        if placesRequired <= 0:
+            flash("Error: places value can not be negative")
             return (
                 render_template(
                     "welcome.html", club=club, competitions=competitions, clubs=clubs
                 ),
                 400,
             )
-        competition["numberOfPlaces"] = (
-            int(competition["numberOfPlaces"]) - placesRequired
-        )
-        club["points"] = club_points - placesRequired
-        club[competition["name"]] = placesRequired
-    else:
-        flash("Error: no enough points")
-        return (
-            render_template(
-                "welcome.html", club=club, competitions=competitions, clubs=clubs
-            ),
-            400,
-        )
-    flash("Great-booking complete!")
+
+        elif club_points >= placesRequired * POINTS_PER_PLACE:
+            if (
+                competition["name"] in club
+                and (club[competition["name"]] + placesRequired) > 12
+            ):
+                flash("Error: can not purchase more than 12 places")
+                return (
+                    render_template(
+                        "welcome.html",
+                        club=club,
+                        competitions=competitions,
+                        clubs=clubs,
+                    ),
+                    400,
+                )
+            competition["numberOfPlaces"] = (
+                int(competition["numberOfPlaces"]) - placesRequired
+            )
+            club["points"] = club_points - placesRequired * POINTS_PER_PLACE
+            if competition["name"] in club:
+                club[competition["name"]] += placesRequired
+            else:
+                club[competition["name"]] = placesRequired
+        else:
+            flash("Error: no enough points")
+            return (
+                render_template(
+                    "welcome.html", club=club, competitions=competitions, clubs=clubs
+                ),
+                400,
+            )
+        flash("Great-booking complete!")
+    except ValueError:
+        flash("Error: Value error")
     return render_template(
         "welcome.html", club=club, competitions=competitions, clubs=clubs
     )
