@@ -45,13 +45,13 @@ class TestIndex:
 
 
 class TestShowSummary:
-    def test_login_with_known_email(self, client):
+    def test_login_with_known_email(self, client, mock_data):
         """
         Case: happy path
             Test log in with a known email returns status code 200 and
         expected content
         """
-        email = server.loadClubs()[0]["email"]
+        email = mock_data["clubs"][0]["email"]
         response = client.post("/showSummary", data={"email": email})
         assert response.status_code == 200
         assert ("GUDLFT Registration") in response.data.decode()
@@ -212,12 +212,12 @@ class TestPurchasePlaces:
         response = client.post(
             "/purchasePlaces",
             data={
-                "places": 4,
+                "places": 1,
                 "competition": competition_name,
                 "club": club_name,
             },
         )
-        places_remaining = club_points - 4
+        places_remaining = club_points - 1
         assert response.status_code == 200
         assert ("Great-booking complete!") in response.data.decode()
         assert (f"Points available: {places_remaining}") in response.data.decode()
