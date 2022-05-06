@@ -23,7 +23,7 @@ As a club administrator:
 
 ## Issues
 
-- Entering an unknown emial crashes the app
+- Entering an unknown email crashes the app
 - Clubs can use more than their points allowed
 - Clubs can book more than 12 places
 - Clubs can book places in past competitions
